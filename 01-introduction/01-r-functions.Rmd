@@ -53,7 +53,7 @@ Write a function f(x) to accept an integer vector, and returns a vector with tho
 f <- function(x) {
   r <- as.character(x[1])
   for (v in 1:length(x)) {
-      if (x[v] %% 3 == 0 & x[v] %% 5 == 0) { r[v] <- "FizzBuzz" }
+      if (x[v] %% 3 == 0 | x[v] %% 5 == 0) { r[v] <- "FizzBuzz" }
       else if (x[v] %% 3 == 0)             { r[v] <- "Fizz" }
       else if (x[v] %% 5 == 0)             { r[v] <- "Buzz" }
       else r[v] <- x[v]
