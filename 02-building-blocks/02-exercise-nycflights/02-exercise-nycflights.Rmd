@@ -1,7 +1,7 @@
 ---
 title: "Assingment NYC Flight Data"
-author: "Your Name Here"
-date: "October 5, 2016"
+author: "Raul Torres"
+date: "April 8, 2017"
 output: html_document
 ---
 
@@ -24,7 +24,14 @@ Put code in each of the sections provided.
 Using the `readr` package read the `flights` data.
 
 ```{r}
+library("readr")
 
+# reading all CSV datasets and saving them as df objects in memory
+data_path <- "C:/Users/rtorres/Desktop/MachLearn/MyUser/CSX460/"
+df_airports <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/airports.csv"))
+df_flights <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/flights.csv"))
+df_planes <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/planes.csv"))
+df_weather <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/weather.csv"))
 
 ```
 
@@ -33,7 +40,8 @@ Using the `readr` package read the `flights` data.
 Plot a histogram of arrival delays and departure delays 
 
 ```{r}
-
+hist(df_flights$arr_delay, xlab = "arrival delays", main = "NYC airport arrival delays")
+hist(df_flights$dep_delay, xlab = "departure delays", main = "NYC airport departure delays")
 ```
 
 ## Scatterplot
@@ -42,6 +50,16 @@ Plot a scatterplot of date vs arrival delay
 
 ```{r}
 
+# first we create a date variable based on existing variables month, day, and year
+df_flights$date <- as.Date(
+                       paste0(
+                           as.character(df_flights$month),"-",as.character(df_flights$day),"-",as.character(df_flights$year)
+                       ),
+                       "%m-%d-%Y"
+                   )
+
+# plot newly created date variable and arrival delay
+plot(df_flights$date, df_flights$arr_delay, xlab = "Date", ylab = "Arrival delay")
 ```
 
 
@@ -51,7 +69,16 @@ Plot a scatterplot of date vs arrival delay
 Create a `table`, counting the flights by origin airports and carrier.
 
 ```{r}
-
+library(dplyr)
+df_flightsNoNA <- df_flights[is.na(df_flights$flight) == FALSE,] #remove missing values in variable flights
+mytable <-
+ df_flightsNoNA %>% 
+  group_by(origin, carrier) %>% #<- select by-grp
+   mutate(totals = sum(flight)) %>% #<- create variable on the fly containing the sum of by-grp
+    select(one_of(c("origin", "carrier", "totals"))) %>% #<- drop unwanted variables
+      arrange(origin, carrier) %>% #<-sort by origin and carrier
+       summarise(count = first(totals)) #<- collapse dataframe leaving the first value of by-grp
+mytable
 
 ```
 
@@ -61,6 +88,20 @@ Create a `table`, counting the flights by origin airports and carrier.
 **Read** in the other data sets. Use methods to join the data together to create a single table containing one record per row.  (HINT: see `?data.table` or `?dplyr::join`)
 
 ```{r}
+# Joining data frames with respect to 'fligts'
+# This means we'll retain all the rows in flights (and matched rows in other dataframes),
+# but we'll drop rows unique to other dataframes. 
+# In dplyr lingo, we'll left_join with flights being the 'left' dataframe
+
+df_airports$origin = df_airports$faa #<-creating a key variable for merging with flights
+
+df_merged <- 
+ left_join(df_flights, df_weather, by = "origin") %>%
+   left_join(df_planes, by = "tailnum") %>%
+     left_join(df_airports, by = "origin")
+
+identical(dim(df_flights)[1],dim(df_merged)[1])
+
 
 ```
 
