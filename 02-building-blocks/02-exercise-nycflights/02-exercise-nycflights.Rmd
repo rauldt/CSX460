@@ -101,14 +101,14 @@ df_airports$origin <- df_airports$faa #<-creating a key variable for merging wit
 # create a common key between flights & weather
 df_weather$date <- as.Date(
                        paste0(
-                           as.character(df_flights$month),"-",as.character(df_flights$day),"-",as.character(df_flights$year)
+                           as.character(df_weather$month),"-",as.character(df_weather$day),"-",as.character(df_weather$year)
                        ),
                        "%m-%d-%Y"
                    )
 
 df_merged <- 
  left_join(df_flights, df_airports, by = "origin") %>%
-   left_join(df_planes, by = "tailnum") #%>%
+   left_join(df_planes, by = "tailnum") %>%
      left_join(df_weather, by = "date")
 
 identical(dim(df_flights)[1],dim(df_merged)[1])
