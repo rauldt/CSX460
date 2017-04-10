@@ -28,10 +28,10 @@ library("readr")
 
 # reading all CSV datasets and saving them as df objects in memory
 data_path <- "C:/Users/rtorres/Desktop/MachLearn/MyUser/CSX460/"
-df_airports <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/airports.csv"))
-df_flights <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/flights.csv"))
-df_planes <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/planes.csv"))
-df_weather <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/weather.csv"))
+df_airports <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/airports.csv"), stringsAsFactors=FALSE)
+df_flights <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/flights.csv"), stringsAsFactors=FALSE)
+df_planes <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/planes.csv"), stringsAsFactors=FALSE)
+df_weather <- read.csv(paste0(data_path,"02-building-blocks/02-exercise-nycflights/data/weather.csv"), stringsAsFactors=FALSE)
 
 ```
 
@@ -93,14 +93,26 @@ mytable
 # but we'll drop rows unique to other dataframes. 
 # In dplyr lingo, we'll left_join with flights being the 'left' dataframe
 
-df_airports$origin = df_airports$faa #<-creating a key variable for merging with flights
+# create a common key between flights & airports
+df_airports$origin <- df_airports$faa #<-creating a key variable for merging with flights
+
+#df_flights <- sample_frac(df_flights, 0.25, replace = TRUE) used for testing - commented out for now
+
+# create a common key between flights & weather
+df_weather$date <- as.Date(
+                       paste0(
+                           as.character(df_flights$month),"-",as.character(df_flights$day),"-",as.character(df_flights$year)
+                       ),
+                       "%m-%d-%Y"
+                   )
 
 df_merged <- 
- left_join(df_flights, df_weather, by = "origin") %>%
-   left_join(df_planes, by = "tailnum") %>%
-     left_join(df_airports, by = "origin")
+ left_join(df_flights, df_airports, by = "origin") %>%
+   left_join(df_planes, by = "tailnum") #%>%
+     left_join(df_weather, by = "date")
 
 identical(dim(df_flights)[1],dim(df_merged)[1])
+print(paste0("We added ", dim(df_merged)[2] - dim(df_flights)[2], " new variables as we joined dataframes."))
 
 
 ```
