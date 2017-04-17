@@ -21,7 +21,7 @@ Break the process down into steps and create a codeblock for each step.
 (You can start with the data that you created last week.)
 
 
-## Step 1: [Step Name] 
+## Step 1: Load data and plot dependent variable 
 
 ```{r "Step 1: Load data and plot dependent variable" }
     
@@ -37,7 +37,7 @@ hist(df$arr_delay_inv)
 ```
 
 
-## Step 2: 
+## Step 2: Fit the dummy model and select another model. Display results
 ```{r "Step 2: Fit the dummy model and select another model. Display results" }
 
 model.dummy <- lm(arr_delay ~ 1, df) #<- same as y-bar
@@ -50,7 +50,7 @@ summary(model1)
 ```
 
 
-## Step 3: 
+## Step 3: Evaluate model (e.g adjusted R^2, residual plot, magnitud and significance of features)
 ```{r "Step 3: Evaluate model (e.g adjusted R^2, residual plot, magnitud and significance of features)" }
 res.modeldummy <- resid(model.dummy)
 res.model1 <- resid(model1)
@@ -64,7 +64,7 @@ Model1 is not very good:
 - Almost all destination binary features are significant
 - The distribution of the residuals is right-skewed (but it is somewhat zero centered)
 
-## Step 4: 
+## Step 4: Fit a new (hopefully better) model
 ```{r "Step 4: Fit a new (hopefully better) model" }
 
 df$date <- as.character(df$date)
