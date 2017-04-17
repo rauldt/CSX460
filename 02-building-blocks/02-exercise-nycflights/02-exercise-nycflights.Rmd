@@ -93,6 +93,7 @@ mytable
 # but we'll drop rows unique to other dataframes. 
 # In dplyr lingo, we'll left_join with flights being the 'left' dataframe
 
+<<<<<<< HEAD
 library(dplyr)
 df_merged <- 
  left_join(df_flights, df_airports, by = c("origin" = "faa")) %>%
@@ -100,6 +101,25 @@ df_merged <-
    left_join(df_planes, by = "tailnum", suffix = c(".flight",".plane")) %>%
     left_join(df_weather, by = c("time_hour","origin"), suffix = c(".flight",".weather"))
 
+=======
+# create a common key between flights & airports
+df_airports$origin <- df_airports$faa #<-creating a key variable for merging with flights
+
+#df_flights <- sample_frac(df_flights, 0.25, replace = TRUE) used for testing - commented out for now
+
+# create a common key between flights & weather
+df_weather$date <- as.Date(
+                       paste0(
+                           as.character(df_weather$month),"-",as.character(df_weather$day),"-",as.character(df_weather$year)
+                       ),
+                       "%m-%d-%Y"
+                   )
+
+df_merged <- 
+ left_join(df_flights, df_airports, by = "origin") %>%
+   left_join(df_planes, by = "tailnum") %>%
+     left_join(df_weather, by = "date")
+>>>>>>> ba89f7771881c204951c278aac792f82092a385b
 
 identical(dim(df_flights)[1],dim(df_merged)[1])
 print(paste0("We added ", dim(df_merged)[2] - dim(df_flights)[2], " new variables as we joined dataframes."))
