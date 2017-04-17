@@ -1,7 +1,7 @@
 ---
 title: "NYCFlights: Arrival Delay Regression Model (Open Ended Variation)"
-author: "[Your Name]"
-date: "[Today's Date]"
+author: "Raul Torres"
+date: "April 16, 2017"
 output: html_document
 ---
 
@@ -23,15 +23,66 @@ Break the process down into steps and create a codeblock for each step.
 
 ## Step 1: [Step Name] 
 
-```{r "Step 1: [Step Name]" }
+```{r "Step 1: Load data and plot dependent variable" }
+    
+p <- "C:/Users/rtorres/Desktop/MachLearn/MyUser/CSX460/03-linear-regression/03-exercise-nycflights-model"  
+df <- read.csv(paste0(p,"/NYCflights.csv"), stringsAsFactors = FALSE)
+hist(df$arr_delay)
+
+# in order to have a more Normal distribution of "y", we transform to inverse of y
+df$arr_delay_inv <- (df$arr_delay^(-1))
+hist(df$arr_delay_inv)
+# because changing to inverse would make the impacts on y more difficult to interpret, we stick to y.
 
 ```
 
-## Step 2: ...
+
+## Step 2: 
+```{r "Step 2: Fit the dummy model and select another model. Display results" }
+
+model.dummy <- lm(arr_delay ~ 1, df) #<- same as y-bar
+(mean(df$arr_delay, na.rm = TRUE))
+summary(model.dummy)
+
+model1 <- lm(arr_delay ~ carrier + month.flight + distance + precip + wind_gust + wind_speed + speed + model + dest + origin, data = df)
+summary(model1)
+
+```
 
 
+## Step 3: 
+```{r "Step 3: Evaluate model (e.g adjusted R^2, residual plot, magnitud and significance of features)" }
+res.modeldummy <- resid(model.dummy)
+res.model1 <- resid(model1)
+
+hist(res.modeldummy)
+hist(res.model1)
+
+```
+Model1 is not very good:
+- Adjusted R-squeared is 0.06
+- Almost all destination binary features are significant
+- The distribution of the residuals is right-skewed (but it is somewhat zero centered)
+
+## Step 4: 
+```{r "Step 4: Fit a new (hopefully better) model" }
+
+df$date <- as.character(df$date)
+df$xmas <- df$date %in% c("2013-12-21","2013-12-22","2013-12-23","2013-12-24","2013-12-26")
+
+model2 <- lm(arr_delay ~ carrier + distance + month.flight + precip + wind_gust + wind_speed + speed + dest + origin + xmas, data = df)
+summary(model2)
+
+res.model2 <- resid(model2)
+hist(res.model2)
+
+```
 
 # Question:
 
-Is this a good model?  (Write your answer here.)
+Is this a good model?  
+Judging by the R-squared, this model is not very good. In fact it is comparable to model 1 in terms of fit.
+The residual distribution looks very similar to model1 and both model1 and model2 seem to have little improvement from the dummy model (yhat)
+
+Had time allowed, I would have liked to control for day of the week and more holiday seasons besides Christmas. 
 
