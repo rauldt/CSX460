@@ -1,7 +1,7 @@
 ---
 title: "NYCFlights: Arrival Delay Logictic Model"
-author: "[Your Name]"
-date: "[Today's Date]"
+author: "Raul"
+date: "April 29, 2017"
 output: html_document
 ---
 
@@ -24,6 +24,26 @@ knitr::opts_chunk$set(echo = TRUE)
 **Hint:** For plotting curves see `?graphics::curve` or `?ggplot2::stat_function`
 
 ```{r "Logistic and Inverse Logistic" }
+
+logit <- function(x, plot = TRUE) {
+    
+    if(!is.numeric(x)) { print("please provide a numeric value or vector") }
+    else {
+      y <- log(1/(1-x)) #<-apply logistic transformation
+      if(plot == TRUE) {qqplot(y,min(x):max(x))} #<-optional visual aid
+      return(y)
+    }
+}
+
+inv.logit <- function(x, plot = TRUE) {
+    
+    if(!is.numeric(x)) { print("please provide a numeric value or vector") }
+    else {
+      y <- exp(x)/(1 + exp(x)) #<-apply inverse logistic transformation
+      if(plot == TRUE) {qqplot(y,min(x):max(x))} #<-optional visual aid
+      return(y)
+    }
+}
 
 ```
 
