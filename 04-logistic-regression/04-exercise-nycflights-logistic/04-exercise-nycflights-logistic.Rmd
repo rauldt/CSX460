@@ -1,8 +1,10 @@
 ---
-title: "NYCFlights: Arrival Delay Logictic Model"
+title: 'NYCFlights: Arrival Delay Logictic Model'
 author: "Raul"
 date: "April 29, 2017"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -30,7 +32,7 @@ logit <- function(x, plot = TRUE) {
     if(!is.numeric(x)) { print("please provide a numeric value or vector") }
     else {
       y <- log(1/(1-x)) #<-apply logistic transformation
-      if(plot == TRUE) {qqplot(y,min(x):max(x))} #<-optional visual aid
+      if(plot == TRUE) {qqplot(min(x):max(x),y)} #<-optional visual aid
       return(y)
     }
 }
@@ -40,10 +42,14 @@ inv.logit <- function(x, plot = TRUE) {
     if(!is.numeric(x)) { print("please provide a numeric value or vector") }
     else {
       y <- exp(x)/(1 + exp(x)) #<-apply inverse logistic transformation
-      if(plot == TRUE) {qqplot(y,min(x):max(x))} #<-optional visual aid
+      if(plot == TRUE) {qqplot(min(x):max(x),y)} #<-optional visual aid
       return(y)
     }
 }
+
+x <- -10:10
+logit(x)
+inv.logit(x)
 
 ```
 
@@ -54,10 +60,75 @@ Using the rectangular data that you created from the earlier assignment and foll
 
 KNIT YOUR DOCUMENT AS *HTML* AND SUBMIT IT AND THE `Rmd` file to your repository.   
 
+```{r}
+library(dplyr)
+library(readr)
+
+# load the data
+data <- read.csv("C:/Users/rtorres/Desktop/MachLearn/MyUser/CSX460/03-linear-regression/03-exercise-nycflights-model/NYCflights.csv", stringsAsFactors = FALSE)
+
+# We want to model arrival delay as a binary variable. 
+# In other words, we consider a flight to be delayed if its arrival is 22 minutes delayed (y=1), otherwise it's considered on time (y=0).
+data$y <- as.numeric(data$arr_delay >= 22)
+
+# Tabulation of our dependent variable
+table(data$y)
+```
+
+Borrowing from last weeks' assigment, we concluded that the best liner model that minimized MSE--by the AIC measure--was:
+
+arr_delay ~ dep_delay + month + air_time + distance + carrier + lat.dest + lon.dest
+
+We now use that model, but changing the dependent variable with our newly created binary dependent variable
+
+``` {r warning = FALSE}
+OLS <- lm(y ~ dep_delay + month.flight + air_time + distance + carrier + lat.dest + lon.dest, data = data)
+
+summary(OLS)
+
+# obtain predictions
+pred.OLS <- predict(OLS)
+summary(pred.OLS)
+
+# We see that OLS predicted values outside [0,1]. We now turn to our logit model:
+LOGIT <- glm(y ~ dep_delay + month.flight + air_time + distance + carrier + lat.dest + lon.dest, data = data, family = binomial(link = "logit"))
+summary(LOGIT)
+pred.LOGIT <- predict(LOGIT, type = 'response')
+
+```
 
 # Question:
 
-Is this a good model?  (Write your answer here.)
+Is this a good model? 
+
+One way to assess how good a model is to determine 'goodness of fit'
+
+```{r waning = FALSE}
+# To answer how good the model is, I interpret several measures of fit:
+# Deviance, pseudoR2, ANOVA of independent variable coefficients
+pscl::pR2(LOGIT)
+anova(LOGIT, test = 'Chisq')
+
+# ANOVA test the difference between the null deviance (naive model)
+# against the deviance of our model. Residual deviance keeps going
+# down as we add variables to the model. 
+# The drops in deviance are statistically significant.
+```
+
+We cannot assess a model without seeing how 'accurate' it is.
+To assess accuracy, we turn to confusion matrix and ROC curves.
+
+``` {r warning = FALSE}
+# Also, I select the 0.5 as a threshold to determine when a y=1 and when y=0.
+# Based on that, I can then measure how accurate my model is. 
+pred.LOGIT <- ifelse(pred.LOGIT > 0.5, 1, 0)
+misClasificError <- mean(pred.LOGIT != LOGIT$y)
+print(paste('Accuracy', 1 - misClasificError))
+
+library(caret)
+confusionMatrix(pred.LOGIT, LOGIT$y, positive = '1')
+
+```
 
 
 # PART B:
