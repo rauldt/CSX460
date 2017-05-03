@@ -31,8 +31,8 @@ logit <- function(x, plot = TRUE) {
     
     if(!is.numeric(x)) { print("please provide a numeric value or vector") }
     else {
-      y <- log(1/(1-x)) #<-apply logistic transformation
-      if(plot == TRUE) {qqplot(min(x):max(x),y)} #<-optional visual aid
+      y <- log(x/(1-x)) #<-apply logistic transformation
+      if(plot == TRUE) {qqplot(x,y)} #<-optional visual aid
       return(y)
     }
 }
