@@ -1,0 +1,73 @@
+---
+title: "Classification Metrics"
+author: "Raul Torres"
+date: "May 9, 2017"
+output: html_document
+---
+
+
+**KNIT YOUR DOCUMENT AS *HTML* AND SUBMIT IT AND THE `Rmd` file.** 
+ 
+
+## Classification Metrics Functions 
+
+Write functions of `y` and `y_hat` to calculate the following classification metrics
+
+* True Positive Rate  
+* False Positive Rate
+* True Negative Rate  
+* False Negative Rate 
+* Sensitivity 
+* Specificity 
+* Recall 
+* Precision
+* Prevalence 
+* Accuracy
+* Kappa
+
+```{r "definitions"}
+
+rates <- function(y, yhat) {
+    tp <- sum(yhat==1 & y==1) / length(y==1)
+    fp <- sum(yhat==1 & y==0) / length(y==0)
+    tn <- sum(yhat==0 & y==0) / length(y==0)
+    fn <- sum(yhat==0 & y==1) / length(y==1)
+    list(TP.rate = tp, FP.rate = fp, TN.rate = tn, FN.rate = fn)
+}
+
+
+```
+
+## Usage 
+
+Use the function(s) above to calculate the metrics for your late arrival model that
+you created last week. 
+
+```{r "evaluations"}
+
+data <- read.csv("C:/Users/rtorres/Desktop/MachLearn/MyUser/CSX460/03-linear-regression/03-exercise-nycflights-model/NYCflights.csv", stringsAsFactors = FALSE)
+```
+
+As a reminder this logit models late arrival (an arrival of 22 or more minutes after scheduled arrival) controling for several covariates
+
+```{r}
+data$y <- as.numeric(data$arr_delay >= 22)
+LOGIT <- glm(y ~ dep_delay + month.flight + air_time + distance + carrier + lat.dest + lon.dest, 
+             data = data, 
+             family = binomial(link = "logit"))
+summary(LOGIT)
+
+```
+
+## Obtaining the vector of predicted values setting a threshold of 0.5
+``` {r}
+yprob <- predict(LOGIT, type = 'response')
+yhat <- as.numeric(yprob>=0.5)
+y <- LOGIT$y
+```
+
+## Obtaining the four requested rates: 
+```{r}
+rates(y, yhat)
+```
+
