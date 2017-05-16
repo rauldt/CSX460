@@ -2,6 +2,10 @@
 title: "Classification Metrics"
 author: "Raul Torres"
 date: "May 9, 2017"
+=======
+title: "Classification Mettrics"
+author: "Christopher Brown"
+date: "October 5, 2015"
 output: html_document
 ---
 
@@ -55,8 +59,12 @@ rates <- function(y, yhat) {
         kappa = kappa)
 }
 
-
+```{r "definitions", echo=FALSE}
 ```
+
+=======
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
 
 ## Usage 
 
@@ -64,7 +72,6 @@ Use the function(s) above to calculate the metrics for your late arrival model t
 you created last week. 
 
 ```{r "evaluations"}
-
 data <- read.csv("C:/Users/rtorres/Desktop/MachLearn/MyUser/CSX460/03-linear-regression/03-exercise-nycflights-model/NYCflights.csv", stringsAsFactors = FALSE)
 ```
 
