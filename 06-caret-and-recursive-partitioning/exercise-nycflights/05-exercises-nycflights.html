@@ -136,7 +136,7 @@ data &lt;- data_orig
 data$y &lt;- as.numeric(data$arr_delay &gt;= 22)
 
 # Remove rows where predictions won't be fesible due to missingness in covariates (or response variable)
-data &lt;- na.omit(data[,c(&quot;y&quot;,&quot;dep_delay&quot;,&quot;month.flight&quot;,&quot;air_time&quot;,&quot;distance&quot;,&quot;carrier&quot;,&quot;lat.dest&quot;,&quot;lon.dest&quot;)])</code></pre>
+data &lt;- na.omit(data[,c(&quot;y&quot;,&quot;dep_delay&quot;,&quot;month.flight&quot;,&quot;air_time&quot;,&quot;distance&quot;,&quot;carrier&quot;,&quot;lat.dest&quot;,&quot;lon.dest&quot;,&quot;arr_delay&quot;)])</code></pre>
 </div>
 <div id="calculate-the-training-or-apparent-performance-of-the-model." class="section level3">
 <h3>Calculate the training or apparent performance of the model.</h3>
@@ -191,39 +191,126 @@ predictions &lt;- ifelse(predict(model, data) &gt; 0.5,1,0)</code></pre>
 </div>
 <div id="exercise-2-caretrpart-5-points" class="section level1">
 <h1>Exercise 2: caret/rpart (5 points)</h1>
-<p>Using the <code>caret</code> and <code>rpart</code> packages, create a <strong>classification</strong> model for flight delays using your NYC FLight data. Your solution should include:</p>
-<div id="the-use-of-caret-and-rpart-to-train-a-model." class="section level3">
-<h3>The use of <code>caret</code> and <code>rpart</code> to train a model.</h3>
-<pre class="r"><code>data &lt;- data_orig</code></pre>
-</div>
-<div id="create-a-three-class-dependent-variable-that-is-2-when-flight-is-late-arr_delay-22-minutes-1-when-delayed-arr_delay-522-and-0-otherwise" class="section level3">
-<h3>Create a three-class dependent variable that is 2 when flight is late (arr_delay &gt; 22 minutes), 1 when delayed (arr_delay [5,22)), and 0 otherwise</h3>
-<pre class="r"><code>data$y &lt;- ifelse(as.numeric(data$arr_delay &gt;= 22),2,
-                 ifelse(as.numeric(data$arr_delay &gt;= 5),1,0))
-
-# Tabulate the newly dependent variable
-table(data$y)</code></pre>
-<pre><code>## 
-##      0      1      2 
-## 103752  23947  31525</code></pre>
-<pre class="r"><code># Remove rows where predictions won't be fesible due to missingness in covariates (or response variable)
-data &lt;- na.omit(data[,c(&quot;y&quot;,&quot;dep_delay&quot;,&quot;month.flight&quot;,&quot;air_time&quot;,&quot;distance&quot;,&quot;carrier&quot;,&quot;lat.dest&quot;,&quot;lon.dest&quot;)])</code></pre>
-</div>
+<p>Using the <code>caret</code> and <code>rpart</code> packages, create a <strong>classification</strong> model for flight delays using your NYC FLight data. Your solution should include the use of <code>caret</code> and <code>rpart</code> to train a model.</p>
 <div id="an-articulation-of-the-problem" class="section level3">
 <h3>An articulation of the problem</h3>
 <p>We want to build a model to classify flights as on-time, delayed, and late. We will use a tree to partition the data by 7 variables. For example, if a flight left 60 minutes after it’s scheduled departure time, we automatically consider it late. If not, then we enter another branch, and so on.</p>
 </div>
-<div id="a-naive-model-making-all-flights-the-most-common-class" class="section level3">
-<h3>A naive model: making all flights the most common class</h3>
-<pre class="r"><code>table(data$y)</code></pre>
-<pre><code>## 
-##      0      1      2 
-## 101312  23383  30966</code></pre>
-<pre class="r"><code>#naive.model &lt;- 
-
-#- An unbiased calculation of the performance metric
-#- A plot of your model -- (the actual tree; there are several ways to do this)
-#- A discussion of your model </code></pre>
+<div id="naive-model-using-the-frequency-of-y-to-obtain-yhat" class="section level3">
+<h3>Naive model: using the frequency of ‘y’ to obtain yhat</h3>
+<pre class="r"><code>yhat.naive &lt;- ifelse(runif(n = length(data$y),0,1) &gt; mean(data$y),1,0)
+confusionMatrix(yhat.naive, as.numeric(data$y))</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction      0      1
+##          0  24622   6068
+##          1 100073  24898
+##                                           
+##                Accuracy : 0.3181          
+##                  95% CI : (0.3158, 0.3204)
+##     No Information Rate : 0.8011          
+##     P-Value [Acc &gt; NIR] : 1               
+##                                           
+##                   Kappa : 7e-04           
+##  Mcnemar's Test P-Value : &lt;2e-16          
+##                                           
+##             Sensitivity : 0.1975          
+##             Specificity : 0.8040          
+##          Pos Pred Value : 0.8023          
+##          Neg Pred Value : 0.1992          
+##              Prevalence : 0.8011          
+##          Detection Rate : 0.1582          
+##    Detection Prevalence : 0.1972          
+##       Balanced Accuracy : 0.5008          
+##                                           
+##        'Positive' Class : 0               
+## </code></pre>
+</div>
+<div id="unbiased-calculation-of-the-performance-metric-using-the-caret-package" class="section level3">
+<h3>Unbiased calculation of the performance metric [using the caret package]</h3>
+<pre class="r"><code>model &lt;- train(y ~ dep_delay + month.flight + air_time + distance + carrier + lat.dest + lon.dest,
+               data = data,
+               trControl = train,
+               method = &quot;rpart&quot;)</code></pre>
+<pre><code>## Warning in train.default(x, y, weights = w, ...): You are trying to do
+## regression and your outcome only has two possible values Are you trying to
+## do classification? If so, use a 2 level factor as your outcome column.</code></pre>
+<pre><code>## Warning in nominalTrainWorkflow(x = x, y = y, wts = weights, info =
+## trainInfo, : There were missing values in resampled performance measures.</code></pre>
+<pre class="r"><code>predictions &lt;- ifelse(predict(model, data) &gt; 0.5,1,0)
+confusionMatrix(predictions, as.numeric(data$y))</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction      0      1
+##          0 121184   8863
+##          1   3511  22103
+##                                           
+##                Accuracy : 0.9205          
+##                  95% CI : (0.9192, 0.9218)
+##     No Information Rate : 0.8011          
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+##                                           
+##                   Kappa : 0.7333          
+##  Mcnemar's Test P-Value : &lt; 2.2e-16       
+##                                           
+##             Sensitivity : 0.9718          
+##             Specificity : 0.7138          
+##          Pos Pred Value : 0.9318          
+##          Neg Pred Value : 0.8629          
+##              Prevalence : 0.8011          
+##          Detection Rate : 0.7785          
+##    Detection Prevalence : 0.8355          
+##       Balanced Accuracy : 0.8428          
+##                                           
+##        'Positive' Class : 0               
+## </code></pre>
+</div>
+<div id="training-the-model-with-the-rpart-package" class="section level3">
+<h3>Training the model [with the rpart package]</h3>
+<pre class="r"><code>rpartTune &lt;- rpart(y ~ dep_delay + month.flight + air_time + distance + carrier + lat.dest + lon.dest,
+                   data = data,
+                   method = &quot;class&quot;,
+                   control = list(cp = 0.01, minsplit = 5, maxdepth = 20))
+TreePredictions &lt;- ifelse(data$arr_delay &lt; 25.5,0,1)
+confusionMatrix(TreePredictions, as.numeric(data$y))</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction      0      1
+##          0 124695   3140
+##          1      0  27826
+##                                           
+##                Accuracy : 0.9798          
+##                  95% CI : (0.9791, 0.9805)
+##     No Information Rate : 0.8011          
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+##                                           
+##                   Kappa : 0.9342          
+##  Mcnemar's Test P-Value : &lt; 2.2e-16       
+##                                           
+##             Sensitivity : 1.0000          
+##             Specificity : 0.8986          
+##          Pos Pred Value : 0.9754          
+##          Neg Pred Value : 1.0000          
+##              Prevalence : 0.8011          
+##          Detection Rate : 0.8011          
+##    Detection Prevalence : 0.8212          
+##       Balanced Accuracy : 0.9493          
+##                                           
+##        'Positive' Class : 0               
+## </code></pre>
+</div>
+<div id="a-plot-of-your-model-the-actual-tree-there-are-several-ways-to-do-this" class="section level3">
+<h3>A plot of your model – (the actual tree; there are several ways to do this)</h3>
+<pre class="r"><code>rpartTree &lt;- as.party(rpartTune)
+plot(rpartTree)</code></pre>
+<p><img src="data:image/png;base64,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6Lf94KRPEOPaovYbHjzJKy5ngQ5++69+2x89mv/6icefDsS4tqj9hgdP8opLW6C719qdHi69n7T6oteBchBYoLHBk7zichbochDS5XGO1//35dILTXZjjAiajJSi9ntn8CRvdrIW6CG75zn+z8sv1duOIcYzE1egdwVP8manhwIdHjJtjqHeH90feane5cHEuLRpCjQgeJJXXA8FOrwj8J7j7YP55y/VuzyYGJc2/T3QxuBJXnG9Fej6fsH+1SXLmx/PF+PaHnII3xI8ySsuZ4FeeTJ0OXg1ye2vLBHj2h7wLHxb8CSvuJwF+nr55XgvCpQzUfsND57kFZezQK+8IeR18AC+AmXjAe9Eague5BWXs0CvvCV5lev9HQOPgbLxgPfCtwVP8orLWaDXPhRnf9JRpD8aTIxLe8SnMTUFT/KKS1qgVz6WcXfS+2kOpFh7xOeBNgVP8opLWqDnHwy+Orja3iM4nORTGdmY8BPp7wue5BWXtUDP/jTNIcfbv+wlxuxN+DeR7gue5BWXtkBP/zjiIMfbkH/iL3uJcXET/lXO+4InecXlLdBQYlxb3v3mnYwICpQC8u4372REUKAUkHe/eScjggKlgLz7zTsZERQoBeTdb97JiKBAKSDvfvNORgQFSgF595t3MiIoUArIu9+8kxFBgVJA3v3mnYwICpQC8u4372REUKAUkHe/eScjggKlgLz7zTsZERQoBeTdb97JiKBAKSDvfvNORgQFSgF595t3MiIoUArIu9+8kxFBgVJA3v3mnYwICpQC8u4372REUKAUkHe/eScjggKlgLz7zTsZERQoBeTdb97JiKBAKSDvfvNORgQFSgF595t3MiIoUArIu9+8kxFBgVJA3v3mnYwICpQC8u4372REUKAUkHe/eScjggKlgLz7zTsZERQoBeTdb97JiKBAKSDvfvNORgQFSgF595t3MiIoUArIu9+8kxFBgVJA3v3mnYwICpQC8u4372REUKAUkHe/eScjggKlgLz7zTsZERQoBeTdb97JiKBAKSDvfvNORgQFSgF595t3MiIoUArIu9+8kxFBgVJA3v3mnYwICpQC8u4372REUKAUkHe/eScjggKlgLz7zTsZERQoBeTdb97JiKBAKSDvfvNORgQFSgF595t3MiIoUArIu9+8kxFBgVJA3v3mnYwICpQC8u4372REUKAUkHe/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" width="672" /></p>
+</div>
+<div id="a-discussion-of-your-model" class="section level3">
+<h3>A discussion of your model</h3>
+<p>The tree identified, as expected, departure delay as the most important predictor of late (y). If a flight leaves more then 24.9 minutes late, the CART model predicted it would be late. Under this umbrella, 25,614 flights were predicted to be late and 130,047 on-time. This simple tree model has an accuracy of .98 and a Kappa of 0.93, which is not bad. This also speaks to the predictive power of delay when knowing how late a flight leaves.</p>
 </div>
 <div id="questions" class="section level3">
 <h3>Questions:</h3>

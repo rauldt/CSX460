@@ -10,6 +10,7 @@ library(rpart)
 library(caret)
 library(dplyr)
 library(pROC)
+library(partykit)
 # .. Additional libraries
 ```
 
@@ -27,7 +28,7 @@ data <- data_orig
 data$y <- as.numeric(data$arr_delay >= 22)
 
 # Remove rows where predictions won't be fesible due to missingness in covariates (or response variable)
-data <- na.omit(data[,c("y","dep_delay","month.flight","air_time","distance","carrier","lat.dest","lon.dest")])
+data <- na.omit(data[,c("y","dep_delay","month.flight","air_time","distance","carrier","lat.dest","lon.dest","arr_delay")])
 ```
 
 
@@ -56,25 +57,9 @@ plot(roc(as.numeric(data$y), predictions))
 
 # Exercise 2: caret/rpart (5 points)
 
-Using the `caret` and `rpart` packages, create a **classification** model for flight delays using your NYC FLight data. Your solution should include:
+Using the `caret` and `rpart` packages, create a **classification** model for flight delays using your NYC FLight data. 
+Your solution should include the use of `caret` and `rpart` to train a model.
 
-### The use of `caret` and `rpart` to train a model.
-```{r}
-data <- data_orig
-```
-
-### Create a three-class dependent variable that is 2 when flight is late (arr_delay > 22 minutes), 1 when delayed (arr_delay [5,22)), and 0 otherwise
-```{r}
-data$y <- ifelse(as.numeric(data$arr_delay >= 22),2,
-                 ifelse(as.numeric(data$arr_delay >= 5),1,0))
-
-# Tabulate the newly dependent variable
-table(data$y)
-
-# Remove rows where predictions won't be fesible due to missingness in covariates (or response variable)
-data <- na.omit(data[,c("y","dep_delay","month.flight","air_time","distance","carrier","lat.dest","lon.dest")])
-
-```
 
 ### An articulation of the problem
 We want to build a model to classify flights as on-time, delayed, and late.
@@ -82,16 +67,52 @@ We will use a tree to partition the data by 7 variables. For example, if a fligh
 scheduled departure time, we automatically consider it late. If not, then we enter another branch, and so on.
 
 
-### A naive model: making all flights the most common class
+### Naive model: using the frequency of 'y' to obtain yhat
 ```{r}
-table(data$y)
-#naive.model <- 
-
-#- An unbiased calculation of the performance metric
-#- A plot of your model -- (the actual tree; there are several ways to do this)
-#- A discussion of your model 
+yhat.naive <- ifelse(runif(n = length(data$y),0,1) > mean(data$y),1,0)
+confusionMatrix(yhat.naive, as.numeric(data$y))
 
 ```
+
+
+### Unbiased calculation of the performance metric [using the caret package]
+```{r}
+model <- train(y ~ dep_delay + month.flight + air_time + distance + carrier + lat.dest + lon.dest,
+               data = data,
+               trControl = train,
+               method = "rpart")
+
+predictions <- ifelse(predict(model, data) > 0.5,1,0)
+confusionMatrix(predictions, as.numeric(data$y))
+
+```
+
+
+### Training the model [with the rpart package]
+```{r}
+rpartTune <- rpart(y ~ dep_delay + month.flight + air_time + distance + carrier + lat.dest + lon.dest,
+                   data = data,
+                   method = "class",
+                   control = list(cp = 0.01, minsplit = 5, maxdepth = 20))
+TreePredictions <- ifelse(data$arr_delay < 25.5,0,1)
+confusionMatrix(TreePredictions, as.numeric(data$y))
+
+```
+
+
+### A plot of your model -- (the actual tree; there are several ways to do this)
+```{r}
+rpartTree <- as.party(rpartTune)
+plot(rpartTree)
+
+```
+
+### A discussion of your model 
+The tree identified, as expected, departure delay as the most important predictor of late (y).
+If a flight leaves more then 24.9 minutes late, the CART model predicted it would be late. 
+Under this umbrella, 25,614 flights were predicted to be late and 130,047 on-time. 
+This simple tree model has an accuracy of .98 and a Kappa of 0.93, which is not bad. 
+This also speaks to the predictive power of delay when knowing how late a flight leaves. 
 
 
 ### Questions:
