@@ -168,93 +168,13 @@ data &lt;- dplyr::sample_frac(data, 0.33, replace = FALSE)</code></pre>
 ctrl &lt;- trainControl(method = &quot;cv&quot;, number = 10, selectionFunction = &quot;best&quot;)
 
 # next, we select our two models along with values for their respective parameters and store them in a grid
-grid_c50 &lt;- expand.grid(.model = &quot;tree&quot;,
-                        .trials = c(10, 15, 20),
+grid_c50 &lt;- expand.grid(.model = c(&quot;tree&quot;,&quot;rules&quot;),
+                        .trials = c(1, 2, 5),
                         .winnow = &quot;FALSE&quot;)
 
 fit.c50 &lt;- train(y ~ ., data = data, method = &quot;C5.0&quot;, metric = &quot;Kappa&quot;, trControl = ctrl, tuneGrid = grid_c50)</code></pre>
 <pre><code>## Loading required package: C50</code></pre>
 <pre><code>## Loading required package: plyr</code></pre>
-<pre><code>## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials
-
-## Warning in predict.C5.0(modelFit, newdata, trial = submodels$trials[j]):
-## 'trials' should be &lt;= 1 for this object. Predictions generated using 1
-## trials</code></pre>
-<pre><code>## Warning in Ops.factor(x$winnow): '!' not meaningful for factors</code></pre>
 </div>
 <div id="tune-random-forest-model" class="section level2">
 <h2>Tune Random Forest model</h2>
@@ -283,19 +203,20 @@ fit.rf &lt;- train(y ~ ., data = data, method = &quot;rf&quot;, metric = &quot;K
 ## 
 ## No pre-processing
 ## Resampling: Cross-Validated (10 fold) 
-## Summary of sample sizes: 46232, 46231, 46231, 46232, 46231, 46232, ... 
+## Summary of sample sizes: 46231, 46231, 46231, 46231, 46231, 46231, ... 
 ## Resampling results across tuning parameters:
 ## 
-##   trials  Accuracy  Kappa
-##   10      1         1    
-##   15      1         1    
-##   20      1         1    
-## 
-## Tuning parameter 'model' was held constant at a value of tree
+##   model  trials  Accuracy  Kappa
+##   rules  1       1         1    
+##   rules  2       1         1    
+##   rules  5       1         1    
+##   tree   1       1         1    
+##   tree   2       1         1    
+##   tree   5       1         1    
 ## 
 ## Tuning parameter 'winnow' was held constant at a value of FALSE
 ## Kappa was used to select the optimal model using  the largest value.
-## The final values used for the model were trials = 10, model = tree
+## The final values used for the model were trials = 1, model = rules
 ##  and winnow = FALSE.</code></pre>
 <pre class="r"><code>fit.rf</code></pre>
 <pre><code>## Random Forest 
@@ -306,11 +227,11 @@ fit.rf &lt;- train(y ~ ., data = data, method = &quot;rf&quot;, metric = &quot;K
 ## 
 ## No pre-processing
 ## Resampling: Cross-Validated (10 fold) 
-## Summary of sample sizes: 46231, 46231, 46231, 46232, 46232, 46230, ... 
+## Summary of sample sizes: 46231, 46231, 46232, 46231, 46231, 46232, ... 
 ## Resampling results across tuning parameters:
 ## 
 ##   mtry  Accuracy   Kappa    
-##   2     0.9972551  0.9925966
+##   2     0.9981117  0.9948736
 ##   4     1.0000000  1.0000000
 ## 
 ## Kappa was used to select the optimal model using  the largest value.
@@ -323,12 +244,12 @@ confusionMatrix(yhat_c50, data$y)</code></pre>
 ## 
 ##           Reference
 ## Prediction     0     1
-##          0 38633     0
-##          1     0 12735
+##          0 38759     0
+##          1     0 12609
 ##                                      
 ##                Accuracy : 1          
 ##                  95% CI : (0.9999, 1)
-##     No Information Rate : 0.7521     
+##     No Information Rate : 0.7545     
 ##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
 ##                                      
 ##                   Kappa : 1          
@@ -338,9 +259,9 @@ confusionMatrix(yhat_c50, data$y)</code></pre>
 ##             Specificity : 1.0000     
 ##          Pos Pred Value : 1.0000     
 ##          Neg Pred Value : 1.0000     
-##              Prevalence : 0.7521     
-##          Detection Rate : 0.7521     
-##    Detection Prevalence : 0.7521     
+##              Prevalence : 0.7545     
+##          Detection Rate : 0.7545     
+##    Detection Prevalence : 0.7545     
 ##       Balanced Accuracy : 1.0000     
 ##                                      
 ##        'Positive' Class : 0          
@@ -350,12 +271,12 @@ confusionMatrix(yhat_c50, data$y)</code></pre>
 ## 
 ##           Reference
 ## Prediction     0     1
-##          0 38633     0
-##          1     0 12735
+##          0 38759     0
+##          1     0 12609
 ##                                      
 ##                Accuracy : 1          
 ##                  95% CI : (0.9999, 1)
-##     No Information Rate : 0.7521     
+##     No Information Rate : 0.7545     
 ##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
 ##                                      
 ##                   Kappa : 1          
@@ -365,9 +286,9 @@ confusionMatrix(yhat_c50, data$y)</code></pre>
 ##             Specificity : 1.0000     
 ##          Pos Pred Value : 1.0000     
 ##          Neg Pred Value : 1.0000     
-##              Prevalence : 0.7521     
-##          Detection Rate : 0.7521     
-##    Detection Prevalence : 0.7521     
+##              Prevalence : 0.7545     
+##          Detection Rate : 0.7545     
+##    Detection Prevalence : 0.7545     
 ##       Balanced Accuracy : 1.0000     
 ##                                      
 ##        'Positive' Class : 0          
@@ -375,8 +296,8 @@ confusionMatrix(yhat_c50, data$y)</code></pre>
 </div>
 <div id="which-is-best-why" class="section level2">
 <h2>Which is best? Why?</h2>
-<p>Based on the model, and set of parameters within that model that maximized Kappa, the best model is:</p>
-<p>Any of the c50 models, or the random forest with parameter mtry = 4, obtains perfect accuracy and Kappa. But we know that is too good to be true (the workd is random, not deterministic), so the models are over fitting the data.</p>
+<p>Based on the model, and the set of parameters within that model, that maximized Kappa the best model is:</p>
+<p>Any of the c50 with one trial, or the random forest with parameter mtry = 4, obtains perfect accuracy and Kappa. But we know that is too good to be true (the workd is random, not deterministic), so the models are over fitting the data.</p>
 </div>
 
 
