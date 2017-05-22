@@ -1,0 +1,97 @@
+---
+title: "Improving Model Perfromance / Tuning Parameters"
+author: "Raul Torres"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+
+## Tuning Parameter
+
+Generically and regardless of model type, what are the purposes of a model
+tuning parameters?
+
+The purpuse is to run the model several times, each time adjusting one or more 
+(depending on the number of parameters a model could have), in order to see which parameter (or set of parameters)
+improves the model fit statistic of our chioce. 
+
+For example, for a knn model-which can take on parameter 'k', we would 'tune' this parameter by selecting several values
+of k and seeing which one maximizes the kappa statistic. 
+
+
+
+## Caret Models
+
+This assignment demonstrates the use of caret for constructing models. Each
+model should be built and compared using using `Kappa` as the performance
+metric calculated using 10-fold repeated cross-validation with 3 folds.
+
+Using the rectangular data that you created for the NYCFlights to create a model
+for arr_delay >= 15 minutes
+
+- glm
+- rpart
+- knn
+- C50
+- randomForest
+- adaBoost
+- Two methods of your choice from the Caret Model List (you will need to install any dependencies)
+
+Save the caret objects with the names provided.
+
+## Loading libraries and data
+```{r}
+library(caret)
+
+# Import dataset
+data <- read.csv("C:/Users/rtorres/Desktop/MachLearn/MyUser/CSX460/03-linear-regression/03-exercise-nycflights-model/NYCflights.csv", stringsAsFactors = FALSE)
+
+# Create a binary dependent variable that is 1 when flight is late (arr_delay > 22 minutes), 0 otherwise. 
+data$y <- as.numeric(data$arr_delay >= 15)
+
+# Remove rows where predictions won't be fesible due to missingness in covariates (or response variable)
+data <- na.omit(data[,c("y","dep_delay","month.flight","air_time","distance","carrier","lat.dest","lon.dest","arr_delay")])
+
+```
+
+## Tune C5.0 model
+```{r}
+
+# first, we select control options
+ctr <- trainControl(method = "cv", number = 10, selectionFunction = "best")
+
+# next, we select our two models along with values for their respective parameters and store them in a grid
+grid_c50 <- expand.grid(.model = "C50",
+                        .trials = c(10, 15, 20),
+                        .winnow = "FALSE")
+
+fit.c50 <- train(y ~ ., data = data, method = "C5.0", metric = "Kappa", trControl = ctrl, tuneGrid = grid_c50)
+
+```
+
+
+## Tune Random Forest model
+```{r}
+
+# next, we select our two models along with values for their respective parameters and store them in a grid
+grid_rf <- expand.grid(.mtry = c(2, 4))
+
+fit.rf <- train(y ~ ., data = data, method = "rf", metric = "Kappa", trControl = ctrl, tuneGrid = grid_rf)
+
+```
+
+
+## Compare the  models?
+Note that we use Kappa as the fit measure on which to declare a model 'best'. Also, we are not going for the
+most parsimonous model, for the one that maximizes Kappa. 
+
+```{r}
+fit.c50
+fit.rf
+```
+
+## Which is best?  Why?
+Based on the model (and set of parameters within that model) that maximized Kappa, the best model is:
+
+
+
