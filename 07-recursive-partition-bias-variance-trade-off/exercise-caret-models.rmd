@@ -47,22 +47,25 @@ library(caret)
 data <- read.csv("C:/Users/rtorres/Desktop/MachLearn/MyUser/CSX460/03-linear-regression/03-exercise-nycflights-model/NYCflights.csv", stringsAsFactors = FALSE)
 
 # Create a binary dependent variable that is 1 when flight is late (arr_delay > 22 minutes), 0 otherwise. 
-data$y <- as.numeric(data$arr_delay >= 15)
+data$y <- factor(as.numeric(data$arr_delay >= 15))
 
 # Remove rows where predictions won't be fesible due to missingness in covariates (or response variable)
 data <- na.omit(data[,c("y","dep_delay","month.flight","air_time","distance","carrier","lat.dest","lon.dest","arr_delay")])
 
+# Take a random sample so that the program does not take forever to run (plus, this is an assignment, not a real project)
+data <- dplyr::sample_frac(data, 0.33, replace = FALSE)
+
 ```
 
 ## Tune C5.0 model
-```{r}
+```{r warning=FALSE}
 
 # first, we select control options
-ctr <- trainControl(method = "cv", number = 10, selectionFunction = "best")
+ctrl <- trainControl(method = "cv", number = 10, selectionFunction = "best")
 
 # next, we select our two models along with values for their respective parameters and store them in a grid
-grid_c50 <- expand.grid(.model = "C50",
-                        .trials = c(10, 15, 20),
+grid_c50 <- expand.grid(.model = c("tree","rules"),
+                        .trials = c(1, 2, 5),
                         .winnow = "FALSE")
 
 fit.c50 <- train(y ~ ., data = data, method = "C5.0", metric = "Kappa", trControl = ctrl, tuneGrid = grid_c50)
@@ -71,7 +74,7 @@ fit.c50 <- train(y ~ ., data = data, method = "C5.0", metric = "Kappa", trContro
 
 
 ## Tune Random Forest model
-```{r}
+```{r warning=FALSE}
 
 # next, we select our two models along with values for their respective parameters and store them in a grid
 grid_rf <- expand.grid(.mtry = c(2, 4))
@@ -88,10 +91,19 @@ most parsimonous model, for the one that maximizes Kappa.
 ```{r}
 fit.c50
 fit.rf
+
+yhat_c50 <- predict(fit.c50, data)
+yhat_rf <- predict(fit.rf, data)
+
+confusionMatrix(yhat_c50, data$y)
+confusionMatrix(yhat_rf, data$y)
+
 ```
 
 ## Which is best?  Why?
-Based on the model (and set of parameters within that model) that maximized Kappa, the best model is:
+Based on the model, and the set of parameters within that model, that maximized Kappa the best model is:
 
+Any of the c50 with one trial, or the random forest with parameter mtry = 4, obtains perfect accuracy and Kappa. 
+But we know that is too good to be true (the workd is random, not deterministic), so the models are over fitting the data.
 
 
