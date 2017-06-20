@@ -53,7 +53,7 @@ data$y <- factor(as.numeric(data$arr_delay >= 15))
 data <- na.omit(data[,c("y","dep_delay","month.flight","air_time","distance","carrier","lat.dest","lon.dest","arr_delay")])
 
 # Take a random sample so that the program does not take forever to run (plus, this is an assignment, not a real project)
-data <- dplyr::sample_frac(data, 0.33, replace = FALSE)
+data <- dplyr::sample_frac(data, 0.75, replace = FALSE)
 
 ```
 

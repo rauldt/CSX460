@@ -160,7 +160,7 @@ data$y &lt;- factor(as.numeric(data$arr_delay &gt;= 15))
 data &lt;- na.omit(data[,c(&quot;y&quot;,&quot;dep_delay&quot;,&quot;month.flight&quot;,&quot;air_time&quot;,&quot;distance&quot;,&quot;carrier&quot;,&quot;lat.dest&quot;,&quot;lon.dest&quot;,&quot;arr_delay&quot;)])
 
 # Take a random sample so that the program does not take forever to run (plus, this is an assignment, not a real project)
-data &lt;- dplyr::sample_frac(data, 0.33, replace = FALSE)</code></pre>
+data &lt;- dplyr::sample_frac(data, 0.75, replace = FALSE)</code></pre>
 </div>
 <div id="tune-c5.0-model" class="section level2">
 <h2>Tune C5.0 model</h2>
@@ -197,13 +197,13 @@ fit.rf &lt;- train(y ~ ., data = data, method = &quot;rf&quot;, metric = &quot;K
 <pre class="r"><code>fit.c50</code></pre>
 <pre><code>## C5.0 
 ## 
-## 51368 samples
-##     8 predictor
-##     2 classes: '0', '1' 
+## 116746 samples
+##      8 predictor
+##      2 classes: '0', '1' 
 ## 
 ## No pre-processing
 ## Resampling: Cross-Validated (10 fold) 
-## Summary of sample sizes: 46231, 46231, 46231, 46231, 46231, 46231, ... 
+## Summary of sample sizes: 105071, 105070, 105071, 105072, 105071, 105072, ... 
 ## Resampling results across tuning parameters:
 ## 
 ##   model  trials  Accuracy  Kappa
@@ -221,17 +221,17 @@ fit.rf &lt;- train(y ~ ., data = data, method = &quot;rf&quot;, metric = &quot;K
 <pre class="r"><code>fit.rf</code></pre>
 <pre><code>## Random Forest 
 ## 
-## 51368 samples
-##     8 predictor
-##     2 classes: '0', '1' 
+## 116746 samples
+##      8 predictor
+##      2 classes: '0', '1' 
 ## 
 ## No pre-processing
 ## Resampling: Cross-Validated (10 fold) 
-## Summary of sample sizes: 46231, 46231, 46232, 46231, 46231, 46232, ... 
+## Summary of sample sizes: 105072, 105071, 105072, 105071, 105072, 105072, ... 
 ## Resampling results across tuning parameters:
 ## 
 ##   mtry  Accuracy   Kappa    
-##   2     0.9981117  0.9948736
+##   2     0.9962398  0.9897007
 ##   4     1.0000000  1.0000000
 ## 
 ## Kappa was used to select the optimal model using  the largest value.
@@ -244,60 +244,60 @@ confusionMatrix(yhat_c50, data$y)</code></pre>
 ## 
 ##           Reference
 ## Prediction     0     1
-##          0 38759     0
-##          1     0 12609
-##                                      
-##                Accuracy : 1          
-##                  95% CI : (0.9999, 1)
-##     No Information Rate : 0.7545     
-##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
-##                                      
-##                   Kappa : 1          
-##  Mcnemar's Test P-Value : NA         
-##                                      
-##             Sensitivity : 1.0000     
-##             Specificity : 1.0000     
-##          Pos Pred Value : 1.0000     
-##          Neg Pred Value : 1.0000     
-##              Prevalence : 0.7545     
-##          Detection Rate : 0.7545     
-##    Detection Prevalence : 0.7545     
-##       Balanced Accuracy : 1.0000     
-##                                      
-##        'Positive' Class : 0          
+##          0 88155     0
+##          1     0 28591
+##                                    
+##                Accuracy : 1        
+##                  95% CI : (1, 1)   
+##     No Information Rate : 0.7551   
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16
+##                                    
+##                   Kappa : 1        
+##  Mcnemar's Test P-Value : NA       
+##                                    
+##             Sensitivity : 1.0000   
+##             Specificity : 1.0000   
+##          Pos Pred Value : 1.0000   
+##          Neg Pred Value : 1.0000   
+##              Prevalence : 0.7551   
+##          Detection Rate : 0.7551   
+##    Detection Prevalence : 0.7551   
+##       Balanced Accuracy : 1.0000   
+##                                    
+##        'Positive' Class : 0        
 ## </code></pre>
 <pre class="r"><code>confusionMatrix(yhat_rf, data$y)</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction     0     1
-##          0 38759     0
-##          1     0 12609
-##                                      
-##                Accuracy : 1          
-##                  95% CI : (0.9999, 1)
-##     No Information Rate : 0.7545     
-##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16  
-##                                      
-##                   Kappa : 1          
-##  Mcnemar's Test P-Value : NA         
-##                                      
-##             Sensitivity : 1.0000     
-##             Specificity : 1.0000     
-##          Pos Pred Value : 1.0000     
-##          Neg Pred Value : 1.0000     
-##              Prevalence : 0.7545     
-##          Detection Rate : 0.7545     
-##    Detection Prevalence : 0.7545     
-##       Balanced Accuracy : 1.0000     
-##                                      
-##        'Positive' Class : 0          
+##          0 88155     0
+##          1     0 28591
+##                                    
+##                Accuracy : 1        
+##                  95% CI : (1, 1)   
+##     No Information Rate : 0.7551   
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16
+##                                    
+##                   Kappa : 1        
+##  Mcnemar's Test P-Value : NA       
+##                                    
+##             Sensitivity : 1.0000   
+##             Specificity : 1.0000   
+##          Pos Pred Value : 1.0000   
+##          Neg Pred Value : 1.0000   
+##              Prevalence : 0.7551   
+##          Detection Rate : 0.7551   
+##    Detection Prevalence : 0.7551   
+##       Balanced Accuracy : 1.0000   
+##                                    
+##        'Positive' Class : 0        
 ## </code></pre>
 </div>
 <div id="which-is-best-why" class="section level2">
 <h2>Which is best? Why?</h2>
 <p>Based on the model, and the set of parameters within that model, that maximized Kappa the best model is:</p>
-<p>Any of the c50 with one trial, or the random forest with parameter mtry = 4, obtains perfect accuracy and Kappa. But we know that is too good to be true (the workd is random, not deterministic), so the models are over fitting the data.</p>
+<p>Any of the c50 with one trial, or the random forest with parameter mtry = 4, obtain perfect Accuracy and Kappa. But we know that is too good to be true (the world is random, not deterministic), so the models are overfitting the data.</p>
 </div>
 
 
